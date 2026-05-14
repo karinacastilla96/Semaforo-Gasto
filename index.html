@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Semáforo Presupuestal 2026</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.12.7/Recharts.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0B1628; font-family: 'Segoe UI', 'Helvetica Neue', sans-serif; color: #E8F1FF; }
+    #root { min-height: 100vh; }
+    #loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; flex-direction: column; gap: 16px;
+      color: #93B4D4; font-size: 16px;
+    }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid #1E3A5F;
+      border-top-color: #2E7CF6; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #error-msg {
+      display: none; align-items: center; justify-content: center;
+      height: 100vh; flex-direction: column; gap: 12px;
+      color: #FECACA; font-size: 14px; text-align: center; padding: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <span>Cargando datos...</span>
+  </div>
+  <div id="error-msg">
+    <div style="font-size:32px">⚠️</div>
+    <strong>No se pudo cargar datos.json</strong>
+    <span>Asegúrate de que el archivo existe en la misma carpeta que index.html</span>
+    <code id="err-detail" style="font-size:11px;color:#9CA3AF;margin-top:8px"></code>
+  </div>
+  <div id="root" style="display:none"></div>
+
+<script>
+// ─── DATOS EMBEBIDOS — actualizar aquí cada mes ───────────────────────────
+// Para actualizar: cambia mesCierre, mesNum, y los valores de gasto/sugerido
+const DATOS = {
+  "mesCierre": "Abril 2026",
+  "mesNum": 4,
+  "presupuestos": [
+    { "nombre": "Content",              "anual": 3900000,     "gasto": 1538650,    "sugerido": 1418181.82 },
+    { "nombre": "Similandia",           "anual": 2000000,     "gasto": 605588.15,  "sugerido": 727272.73  },
+    { "nombre": "Jueves de Bondad",     "anual": 1500000,     "gasto": 409359.38,  "sugerido": 545454.55  },
+    { "nombre": "USI",                  "anual": 1500000,     "gasto": 398978.26,  "sugerido": 545454.55  },
+    { "nombre": "Simipet",              "anual": 3000000,     "gasto": 796897.13,  "sugerido": 1090909.09 },
+    { "nombre": "Ecommerce MX",         "anual": 14609361.94, "gasto": 3778975.41, "sugerido": 5312495.25 },
+    { "nombre": "Museo Dr. Simi",       "anual": 3000000,     "gasto": 771852.09,  "sugerido": 1090909.09 },
+    { "nombre": "Campaña VGH",          "anual": 3000000,     "gasto": 751017.58,  "sugerido": 1090909.09 },
+    { "nombre": "Branding Dr. Simi",    "anual": 17000000,    "gasto": 4245568.54, "sugerido": 6181818.18 },
+    { "nombre": "Licencias",            "anual": 3000000,     "gasto": 747120.66,  "sugerido": 1090909.09 },
+    { "nombre": "Fund. Simiplaneta",    "anual": 3000000,     "gasto": 976677.22,  "sugerido": 1090909.09 },
+    { "nombre": "Simi Space",           "anual": 12000000,    "gasto": 2236105.36, "sugerido": 4363636.36 },
+    { "nombre": "F. Similares Inst.",   "anual": 5400000,     "gasto": 813070.86,  "sugerido": 1963636.36 },
+    { "nombre": "Página Satélite QPT",  "anual": 3000000,     "gasto": 365855.42,  "sugerido": 1090909.09 },
+    { "nombre": "Simi Globo",           "anual": 2100000,     "gasto": 242448.64,  "sugerido": 763636.36  },
+    { "nombre": "Ecommerce USA",        "anual": 21000000,    "gasto": 1865315.03, "sugerido": 7636363.64 },
+    { "nombre": "Colombia",             "anual": 8000000,     "gasto": 1177747.15, "sugerido": 2909090.91 },
+    { "nombre": "Mundial",              "anual": 12000000,    "gasto": 21352.5,    "sugerido": 4363636.36 },
+    { "nombre": "Simi Fest",            "anual": 4800000,     "gasto": 0,          "sugerido": 1745454.55 },
+    { "nombre": "Buen Fin",             "anual": 2000000,     "gasto": 0,          "sugerido": 727272.73  },
+    { "nombre": "Inauguración Isla",    "anual": 3000000,     "gasto": 0,          "sugerido": 1090909.09 },
+    { "nombre": "Simicarreras",         "anual": 400000,      "gasto": 0,          "sugerido": 145454.55  }
+  ]
+};
+
+// ─── Esperar a que Recharts cargue y arrancar ─────────────────────────────
+(function waitRecharts() {
+  if (typeof Recharts === 'undefined') { setTimeout(waitRecharts, 50); return; }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('root').style.display = 'block';
+  initDashboard(DATOS);
+})();
+
+function initDashboard(CONFIG) {
+  const { createElement: h, useState, useMemo } = React;
+  const { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+          Cell, PieChart, Pie, Legend } = Recharts;
+
+  // ── Paleta ──────────────────────────────────────────────────────────────
+  const C = {
+    azulOsc:'#0A1F44', azulMed:'#1A3A6B', azulBase:'#1D5BB5', azulClaro:'#2E7CF6',
+    azulPastel:'#DBEAFE', azulBorde:'#1E3A5F',
+    fondo:'#0B1628', fondoCard:'#112240', fondoCard2:'#162D4E',
+    borde:'#1E3A5F', borde2:'#254875',
+    blanco:'#FFFFFF', texto:'#E8F1FF', textoSub:'#93B4D4', textoMuted:'#4F7299',
+    verde:'#16A34A', verdeClaro:'#BBF7D0', verdeFondo:'#052E16',
+    rojo:'#DC2626', rojoClaro:'#FECACA', rojoFondo:'#2D0A0A',
+    amarillo:'#D97706', amarilloClaro:'#FEF08A', amarilloFondo:'#2D1A00',
+  };
+
+  // ── Datos desde JSON ─────────────────────────────────────────────────────
+  const MES_CIERRE    = CONFIG.mesCierre;
+  const MES_NUM       = CONFIG.mesNum;
+  const PCT_ESPERADO  = MES_NUM / 12;
+  const UMBRAL_ALERTA = 0.05;
+
+  const SEMAFORO_COLOR = { excedido:C.rojo, alerta:C.amarillo, ok:C.azulClaro, exacto:C.verde };
+  const SEMAFORO_FONDO = { excedido:C.rojoFondo, alerta:C.amarilloFondo, ok:C.azulOsc, exacto:C.verdeFondo };
+  const SEMAFORO_LABEL = { excedido:'Excedido', alerta:'Alerta', ok:'En curso', exacto:'En meta' };
+
+  function getSemaforo(d) {
+    const pct = d.anual > 0 ? d.gasto / d.anual : 0;
+    if (d.gasto === 0) return 'alerta';
+    if (pct > PCT_ESPERADO) return 'excedido';
+    const brecha = PCT_ESPERADO - pct;
+    if (brecha > UMBRAL_ALERTA) return 'alerta';
+    if (brecha <= 0.001) return 'exacto';
+    return 'ok';
+  }
+
+  const data = CONFIG.presupuestos.map(d => {
+    const pctReal = d.anual > 0 ? d.gasto / d.anual : 0;
+    const diffPp  = PCT_ESPERADO - pctReal;
+    const sem     = getSemaforo(d);
+    return { ...d, pctGastado:pctReal, pctReal, diffPp,
+      restante:d.anual-d.gasto, diferencial:d.gasto-d.sugerido,
+      semaforo:sem, semaforoColor:SEMAFORO_COLOR[sem],
+      semaforoFondo:SEMAFORO_FONDO[sem], semaforoLabel:SEMAFORO_LABEL[sem] };
+  });
+
+  const totalAnual    = data.reduce((s,d)=>s+d.anual,0);
+  const totalGasto    = data.reduce((s,d)=>s+d.gasto,0);
+  const totalRestante = totalAnual - totalGasto;
+  const pctTotal      = totalGasto / totalAnual;
+
+  // ── Formatos ─────────────────────────────────────────────────────────────
+  const fmtFull = v => '$'+new Intl.NumberFormat('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Math.abs(v));
+  const fmt = v => {
+    const a=Math.abs(v), s=v<0?'-':'';
+    if(a>=1e6) return s+'$'+new Intl.NumberFormat('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}).format(a/1e6)+'M';
+    return s+'$'+new Intl.NumberFormat('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0}).format(a);
+  };
+  const fmtPct = v => (v*100).toFixed(1)+'%';
+  const countBySem = sem => data.filter(d=>d.semaforo===sem).length;
+
+  // ── Componentes pequeños ─────────────────────────────────────────────────
+  function Chip({ label, active, onClick, accentColor }) {
+    const bg = active ? (accentColor||C.azulClaro) : C.fondoCard2;
+    const fg = active ? '#fff' : C.textoSub;
+    const br = active ? (accentColor||C.azulClaro) : C.borde2;
+    return h('button',{onClick,style:{
+      padding:'5px 14px', background:bg, color:fg,
+      border:`1px solid ${br}`, borderRadius:20,
+      cursor:'pointer', fontSize:12, fontWeight:700,
+      transition:'all .15s', whiteSpace:'nowrap'
+    }}, label);
+  }
+
+  function PresupuestoCard({ d }) {
+    const sc  = d.semaforoColor;
+    const bar = Math.min(d.pctGastado,1);
+    const dpa = Math.abs(d.diffPp*100).toFixed(1);
+    return h('div',{style:{
+      background:C.fondoCard, border:`1px solid ${C.borde}`,
+      borderLeft:`4px solid ${sc}`, borderRadius:10, padding:'14px 20px'
+    }},
+      // Header row
+      h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:10}},
+        h('div',{style:{flex:1,minWidth:200}},
+          h('div',{style:{fontWeight:800,color:C.texto,fontSize:14}}, d.nombre),
+          h('div',{style:{fontSize:11,color:C.textoMuted,marginTop:3}},
+            'Anual: ', h('span',{style:{color:C.textoSub}},fmtFull(d.anual)),
+            '   ·   Sugerido al corte: ', h('span',{style:{color:C.azulClaro}},fmtFull(d.sugerido))
+          )
+        ),
+        h('div',{style:{display:'flex',gap:18,alignItems:'center',flexWrap:'wrap'}},
+          h('div',{style:{textAlign:'right'}},
+            h('div',{style:{fontSize:15,fontWeight:800,color:C.texto}}, fmtFull(d.gasto)),
+            h('div',{style:{fontSize:10,color:C.textoMuted}}, 'gastado')
+          ),
+          h('div',{style:{textAlign:'right'}},
+            h('div',{style:{fontSize:15,fontWeight:800,color:sc}}, fmtPct(d.pctGastado)),
+            h('div',{style:{fontSize:10,color:C.textoMuted}}, 'del anual')
+          ),
+          h('span',{style:{
+            padding:'4px 12px', background:sc+'22', color:sc,
+            borderRadius:20, fontSize:11, fontWeight:700, border:`1px solid ${sc}44`, whiteSpace:'nowrap'
+          }}, d.semaforoLabel)
+        )
+      ),
+      // Progress bar
+      h('div',{style:{marginTop:10}},
+        h('div',{style:{background:C.borde2,borderRadius:4,height:7,overflow:'hidden'}},
+          h('div',{style:{width:`${bar*100}%`,height:'100%',background:sc,borderRadius:4}})
+        ),
+        h('div',{style:{display:'flex',justifyContent:'space-between',fontSize:10,color:C.textoMuted,marginTop:4}},
+          h('span',null,'0%'),
+          h('span',{style:{color:C.azulClaro}}, 'Esperado al corte: '+fmtPct(PCT_ESPERADO)),
+          h('span',null,'100%')
+        )
+      ),
+      // Status message
+      d.semaforo==='excedido' && h('div',{style:{marginTop:8,fontSize:11,color:C.rojo,fontWeight:700}},
+        '🔴 Excedido: '+fmtPct(d.pctReal)+' ejecutado vs '+fmtPct(PCT_ESPERADO)+' esperado (+'+dpa+'pp sobre el corte)'
+      ),
+      d.semaforo==='alerta' && d.gasto===0 && h('div',{style:{marginTop:8,fontSize:11,color:C.amarillo,fontWeight:700}},
+        '🟡 Sin gasto registrado — se esperaba '+fmtPct(PCT_ESPERADO)+' ('+fmtFull(d.sugerido)+') al corte'
+      ),
+      d.semaforo==='alerta' && d.gasto>0 && h('div',{style:{marginTop:8,fontSize:11,color:C.amarillo,fontWeight:700}},
+        '🟡 Rezago de '+dpa+'pp: tiene '+fmtPct(d.pctReal)+', se esperaba '+fmtPct(PCT_ESPERADO)+' — diferencia > 5pp'
+      ),
+      d.semaforo==='ok' && h('div',{style:{marginTop:8,fontSize:11,color:C.azulClaro}},
+        '🔵 Tiene '+fmtPct(d.pctReal)+', a '+dpa+'pp del esperado ('+fmtPct(PCT_ESPERADO)+') — dentro del rango aceptable'
+      ),
+      d.semaforo==='exacto' && h('div',{style:{marginTop:8,fontSize:11,color:C.verde,fontWeight:700}},
+        '🟢 En meta — gasto alineado al sugerido'
+      )
+    );
+  }
+
+  // ── Dashboard principal ──────────────────────────────────────────────────
+  function Dashboard() {
+    const [tab,         setTab]         = useState('Resumen');
+    const [sortBy,      setSortBy]      = useState('gasto');
+    const [filter,      setFilter]      = useState('Todos');
+    const [topFilter,   setTopFilter]   = useState('ambos');
+    const [alertFilter, setAlertFilter] = useState('Todos');
+
+    const filteredData = useMemo(() => {
+      let d = [...data];
+      if (filter==='Excedido') d=d.filter(x=>x.semaforo==='excedido');
+      if (filter==='Alerta')   d=d.filter(x=>x.semaforo==='alerta');
+      if (filter==='En curso') d=d.filter(x=>x.semaforo==='ok');
+      if (filter==='En meta')  d=d.filter(x=>x.semaforo==='exacto');
+      if (sortBy==='gasto')        d.sort((a,b)=>b.gasto-a.gasto);
+      if (sortBy==='pct')          d.sort((a,b)=>b.pctGastado-a.pctGastado);
+      if (sortBy==='diferencial')  d.sort((a,b)=>b.diferencial-a.diferencial);
+      if (sortBy==='anual')        d.sort((a,b)=>b.anual-a.anual);
+      return d;
+    }, [sortBy, filter]);
+
+    const excedidos = data.filter(d=>d.semaforo==='excedido');
+    const alertas   = data.filter(d=>d.semaforo==='alerta');
+    const enCurso   = data.filter(d=>d.semaforo==='ok');
+    const enMeta    = data.filter(d=>d.semaforo==='exacto');
+    const topGasto  = [...data].sort((a,b)=>b.gasto-a.gasto).slice(0,8);
+    const topPct    = [...data].sort((a,b)=>b.pctGastado-a.pctGastado).slice(0,8);
+    const topMenor  = [...data].sort((a,b)=>a.pctGastado-b.pctGastado).slice(0,8);
+    const pieData   = [{name:'Gastado',value:totalGasto,color:C.azulClaro},{name:'Restante',value:totalRestante,color:C.azulBorde}];
+
+    const ttStyle = {
+      contentStyle:{background:C.fondoCard,border:`1px solid ${C.borde2}`,borderRadius:8,fontSize:12,color:C.texto},
+      cursor:{fill:'#ffffff06'}
+    };
+    const fbarStyle = {
+      background:C.fondoCard, border:`1px solid ${C.borde}`, borderRadius:12,
+      padding:'12px 18px', marginBottom:18,
+      display:'flex', gap:8, flexWrap:'wrap', alignItems:'center'
+    };
+
+    const TABS = ['Resumen','Por Presupuesto','Alertas','Top Gasto'];
+
+    return h('div',{style:{fontFamily:"'Segoe UI','Helvetica Neue',sans-serif",background:C.fondo,minHeight:'100vh',color:C.texto}},
+
+      // ── HEADER ──────────────────────────────────────────────────────────
+      h('div',{style:{
+        background:`linear-gradient(135deg,${C.azulOsc} 0%,${C.azulMed} 60%,${C.azulBase} 100%)`,
+        padding:'26px 32px 20px', borderBottom:`3px solid ${C.azulClaro}`,
+        display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:16
+      }},
+        h('div',null,
+          h('div',{style:{fontSize:11,color:C.azulPastel,fontWeight:700,letterSpacing:'0.2em',textTransform:'uppercase',marginBottom:6}},
+            'Control Presupuestal 2026'
+          ),
+          h('h1',{style:{margin:0,fontSize:30,fontWeight:900,color:C.blanco,letterSpacing:'-0.5px',lineHeight:1.1}},
+            'Semáforo de Gasto'
+          ),
+          h('div',{style:{marginTop:7,fontSize:13,color:C.textoSub}},
+            'Corte: ', h('span',{style:{color:C.blanco,fontWeight:700}},MES_CIERRE),
+            '   ·   Avance esperado: ', h('span',{style:{color:C.azulPastel,fontWeight:700}},fmtPct(PCT_ESPERADO))
+          ),
+          // Leyenda semáforo
+          h('div',{style:{display:'flex',gap:14,marginTop:12,flexWrap:'wrap'}},
+            ...[[C.rojo,'🔴 Excedido'],[C.amarillo,'🟡 Alerta (>5pp del esperado)'],[C.azulClaro,'🔵 En curso'],[C.verde,'🟢 En meta']].map(([clr,lbl])=>
+              h('div',{key:lbl,style:{display:'flex',alignItems:'center',gap:6,fontSize:11}},
+                h('div',{style:{width:10,height:10,borderRadius:'50%',background:clr,flexShrink:0}}),
+                h('span',{style:{color:C.textoSub}},lbl)
+              )
+            )
+          )
+        ),
+        h('div',{style:{
+          background:'rgba(10,31,68,0.7)', border:`2px solid ${C.azulClaro}`,
+          borderRadius:14, padding:'16px 26px', textAlign:'center', minWidth:150
+        }},
+          h('div',{style:{fontSize:10,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.14em'}},'Ejecución Global'),
+          h('div',{style:{fontSize:44,fontWeight:900,color:C.azulPastel,lineHeight:1.1,marginTop:4}}, fmtPct(pctTotal)),
+          h('div',{style:{fontSize:11,color:C.textoSub,marginTop:2}},'del presupuesto anual')
+        )
+      ),
+
+      // ── KPI CARDS ────────────────────────────────────────────────────────
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(185px,1fr))',gap:14,padding:'22px 32px 0'}},
+        ...[
+          {label:'Presupuesto Total Anual', value:fmt(totalAnual),    sub:fmtFull(totalAnual),              color:C.azulClaro, icon:'💼'},
+          {label:'Gasto Realizado',         value:fmt(totalGasto),    sub:fmtPct(pctTotal)+' ejecutado',    color:C.blanco,    icon:'📊'},
+          {label:'Monto Restante',          value:fmt(totalRestante), sub:fmtPct(totalRestante/totalAnual)+' disponible', color:C.azulPastel, icon:'🏦'},
+          {label:'Excedidos 🔴',            value:countBySem('excedido'), sub:'sobre el gasto esperado',    color:C.rojo,      icon:'🔴'},
+          {label:'En Alerta 🟡',            value:countBySem('alerta'),   sub:'sin inicio o >5pp de rezago',color:C.amarillo,  icon:'🟡'},
+          {label:'En Curso 🔵',             value:countBySem('ok'),       sub:'dentro del rango aceptable', color:C.azulClaro, icon:'🔵'},
+          {label:'En Meta 🟢',              value:countBySem('exacto'),   sub:'alineados al sugerido',      color:C.verde,     icon:'🟢'},
+        ].map(kpi=>h('div',{key:kpi.label,style:{
+          background:C.fondoCard, border:`1px solid ${C.borde}`,
+          borderTop:`3px solid ${kpi.color}`, borderRadius:12, padding:'14px 16px'
+        }},
+          h('div',{style:{fontSize:20,marginBottom:5}},kpi.icon),
+          h('div',{style:{fontSize:10,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:3}},kpi.label),
+          h('div',{style:{fontSize:24,fontWeight:900,color:kpi.color}},kpi.value),
+          h('div',{style:{fontSize:11,color:C.textoSub,marginTop:3}},kpi.sub)
+        ))
+      ),
+
+      // ── TABS ─────────────────────────────────────────────────────────────
+      h('div',{style:{padding:'22px 32px 0'}},
+        h('div',{style:{display:'flex',gap:3,borderBottom:`2px solid ${C.borde}`}},
+          ...TABS.map(t=>h('button',{key:t,onClick:()=>setTab(t),style:{
+            padding:'10px 22px',
+            background:tab===t?C.azulClaro:'transparent',
+            color:tab===t?C.blanco:C.textoMuted,
+            border:'none', borderRadius:'8px 8px 0 0',
+            cursor:'pointer', fontWeight:tab===t?800:500, fontSize:13,
+            transition:'all .15s', marginBottom:-2
+          }},t))
+        )
+      ),
+
+      // ── TAB CONTENT ──────────────────────────────────────────────────────
+      h('div',{style:{padding:'22px 32px 48px'}},
+
+        // ═══ RESUMEN ════════════════════════════════════════════════════════
+        tab==='Resumen' && h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20}},
+
+          // Donut
+          h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontWeight:700}},
+              'Distribución del Presupuesto Total'
+            ),
+            h(ResponsiveContainer,{width:'100%',height:230},
+              h(PieChart,null,
+                h(Pie,{data:pieData,cx:'50%',cy:'50%',innerRadius:68,outerRadius:95,dataKey:'value',strokeWidth:3,stroke:C.fondo},
+                  pieData.map((e,i)=>h(Cell,{key:i,fill:e.color}))
+                ),
+                h(Legend,{formatter:(value,entry)=>
+                  h('span',{style:{color:C.textoSub,fontSize:12}},
+                    value+': ', h('strong',{style:{color:C.texto}},fmtFull(entry.payload.value))
+                  )
+                }),
+                h(Tooltip,{...ttStyle,formatter:v=>[fmtFull(v),'']})
+              )
+            )
+          ),
+
+          // Distribución semáforo
+          h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontWeight:700}},
+              'Distribución por Semáforo'
+            ),
+            ...[
+              {label:'🔴 Excedidos', count:excedidos.length, color:C.rojo,     items:excedidos},
+              {label:'🟡 En Alerta', count:alertas.length,   color:C.amarillo, items:alertas},
+              {label:'🔵 En Curso',  count:enCurso.length,   color:C.azulClaro,items:enCurso},
+              {label:'🟢 En Meta',   count:enMeta.length,    color:C.verde,    items:enMeta},
+            ].map(row=>h('div',{key:row.label,style:{marginBottom:14}},
+              h('div',{style:{display:'flex',justifyContent:'space-between',fontSize:12,marginBottom:5}},
+                h('span',{style:{color:C.texto,fontWeight:700}},row.label),
+                h('span',{style:{color:row.color,fontWeight:800}},row.count+' presupuestos')
+              ),
+              h('div',{style:{background:C.borde2,borderRadius:4,height:8,overflow:'hidden'}},
+                h('div',{style:{width:`${(row.count/data.length)*100}%`,height:'100%',background:row.color,borderRadius:4}})
+              ),
+              h('div',{style:{fontSize:10,color:C.textoMuted,marginTop:3}},
+                row.items.map(d=>d.nombre).join(' · ')
+              )
+            ))
+          ),
+
+          // % Ejecutado Top 8
+          h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontWeight:700}},
+              '% Ejecutado del Presupuesto Anual — Top 8'
+            ),
+            h(ResponsiveContainer,{width:'100%',height:230},
+              h(BarChart,{data:topPct,layout:'vertical',margin:{left:0,right:16}},
+                h(XAxis,{type:'number',domain:[0,1],tickFormatter:v=>`${(v*100).toFixed(0)}%`,tick:{fill:C.textoMuted,fontSize:10},axisLine:false,tickLine:false}),
+                h(YAxis,{type:'category',dataKey:'nombre',width:130,tick:{fill:C.textoSub,fontSize:10},axisLine:false,tickLine:false}),
+                h(Tooltip,{...ttStyle,formatter:v=>[fmtPct(v),'% Ejecutado']}),
+                h(Bar,{dataKey:'pctGastado',radius:[0,4,4,0]},
+                  topPct.map(d=>h(Cell,{key:d.nombre,fill:d.semaforoColor}))
+                )
+              )
+            )
+          ),
+
+          // Gasto Real vs Sugerido Top 8
+          h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontWeight:700}},
+              'Gasto Real vs. Sugerido al Corte — Top 8'
+            ),
+            h(ResponsiveContainer,{width:'100%',height:230},
+              h(BarChart,{data:topGasto,layout:'vertical',margin:{left:0,right:16}},
+                h(XAxis,{type:'number',tickFormatter:fmt,tick:{fill:C.textoMuted,fontSize:10},axisLine:false,tickLine:false}),
+                h(YAxis,{type:'category',dataKey:'nombre',width:130,tick:{fill:C.textoSub,fontSize:10},axisLine:false,tickLine:false}),
+                h(Tooltip,{...ttStyle,formatter:(v,n)=>[fmtFull(v),n==='gasto'?'Gasto Real':'Sugerido']}),
+                h(Legend,{formatter:v=>h('span',{style:{color:C.textoSub,fontSize:11}},v==='gasto'?'Gasto Real':'Sugerido')}),
+                h(Bar,{dataKey:'sugerido',fill:C.borde2,radius:[0,4,4,0],name:'sugerido'}),
+                h(Bar,{dataKey:'gasto',fill:C.azulClaro,radius:[0,4,4,0],name:'gasto'},
+                  topGasto.map(d=>h(Cell,{key:d.nombre,fill:d.semaforoColor}))
+                )
+              )
+            )
+          )
+        ),
+
+        // ═══ POR PRESUPUESTO ════════════════════════════════════════════════
+        tab==='Por Presupuesto' && h('div',null,
+          h('div',{style:fbarStyle},
+            h('span',{style:{fontSize:11,color:C.textoMuted,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.1em'}},'Semáforo:'),
+            ...[['Todos',null,`Todos (${data.length})`],['Excedido',C.rojo,`🔴 Excedidos (${excedidos.length})`],
+              ['Alerta',C.amarillo,`🟡 Alerta (${alertas.length})`],['En curso',C.azulClaro,`🔵 En Curso (${enCurso.length})`],
+              ['En meta',C.verde,`🟢 En Meta (${enMeta.length})`]
+            ].map(([f,clr,lbl])=>h(Chip,{key:f,label:lbl,active:filter===f,accentColor:clr,onClick:()=>setFilter(f)})),
+            h('div',{style:{width:1,height:22,background:C.borde2,margin:'0 4px'}}),
+            h('span',{style:{fontSize:11,color:C.textoMuted,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.1em'}},'Ordenar:'),
+            ...[['gasto','Mayor Gasto'],['pct','Mayor % Eje.'],['diferencial','Mayor Diferencial'],['anual','Mayor Presupuesto']
+            ].map(([k,l])=>h(Chip,{key:k,label:l,active:sortBy===k,accentColor:C.azulMed,onClick:()=>setSortBy(k)})),
+            h('span',{style:{marginLeft:'auto',fontSize:11,color:C.textoMuted}},filteredData.length+'/'+data.length+' presupuestos')
+          ),
+          h('div',{style:{display:'grid',gap:10}},
+            filteredData.map(d=>h(PresupuestoCard,{key:d.nombre,d}))
+          )
+        ),
+
+        // ═══ ALERTAS ════════════════════════════════════════════════════════
+        tab==='Alertas' && h('div',null,
+          h('div',{style:fbarStyle},
+            h('span',{style:{fontSize:11,color:C.textoMuted,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.1em'}},'Tipo:'),
+            ...[['Todos',null,'Todas las alertas'],['Excedidos',C.rojo,`🔴 Excedidos (${excedidos.length})`],
+              ['Alertas',C.amarillo,`🟡 En Alerta (${alertas.length})`]
+            ].map(([f,clr,lbl])=>h(Chip,{key:f,label:lbl,active:alertFilter===f,accentColor:clr,onClick:()=>setAlertFilter(f)}))
+          ),
+
+          (alertFilter==='Todos'||alertFilter==='Excedidos') && excedidos.length>0 && h('div',{style:{marginBottom:28}},
+            h('div',{style:{fontSize:14,color:C.rojo,fontWeight:900,marginBottom:14,display:'flex',alignItems:'center',gap:8}},
+              '🔴 Presupuestos excedidos al corte',
+              h('span',{style:{background:C.rojoFondo,color:C.rojo,border:`1px solid ${C.rojo}55`,borderRadius:20,padding:'2px 12px',fontSize:11}},
+                excedidos.length+' presupuesto'+(excedidos.length!==1?'s':'')
+              )
+            ),
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}},
+              excedidos.map(d=>h('div',{key:d.nombre,style:{
+                background:C.rojoFondo, border:`1px solid ${C.rojo}44`,
+                borderTop:`3px solid ${C.rojo}`, borderRadius:10, padding:'16px 18px'
+              }},
+                h('div',{style:{fontWeight:800,color:C.rojoClaro,marginBottom:10,fontSize:14}},d.nombre),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,fontSize:12}},
+                  ...[['Ejecutado',fmtPct(d.pctReal),C.rojo],['Esperado corte',fmtPct(PCT_ESPERADO),C.textoSub],
+                    ['Exceso (pp)',`+${(Math.abs(d.diffPp)*100).toFixed(1)}pp`,'#f87171'],
+                    ['Excedente $',`+${fmtFull(Math.abs(d.diferencial))}`,C.rojoClaro]
+                  ].map(([lbl,val,clr])=>h('div',{key:lbl},
+                    h('div',{style:{color:C.textoMuted,fontSize:10,textTransform:'uppercase',letterSpacing:'0.05em'}},lbl),
+                    h('div',{style:{fontWeight:800,color:clr,marginTop:2}},val)
+                  ))
+                )
+              ))
+            )
+          ),
+
+          (alertFilter==='Todos'||alertFilter==='Alertas') && alertas.length>0 && h('div',null,
+            h('div',{style:{fontSize:14,color:C.amarillo,fontWeight:900,marginBottom:8,display:'flex',alignItems:'center',gap:8}},
+              '🟡 Presupuestos en alerta',
+              h('span',{style:{background:C.amarilloFondo,color:C.amarillo,border:`1px solid ${C.amarillo}55`,borderRadius:20,padding:'2px 12px',fontSize:11}},
+                alertas.length+' presupuesto'+(alertas.length!==1?'s':'')
+              )
+            ),
+            h('div',{style:{fontSize:11,color:C.textoMuted,marginBottom:12}},
+              'Sin inicio o con más de 5pp de rezago vs el '+fmtPct(PCT_ESPERADO)+' esperado al corte de '+MES_CIERRE+'.'
+            ),
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}},
+              alertas.map(d=>h('div',{key:d.nombre,style:{
+                background:C.amarilloFondo, border:`1px solid ${C.amarillo}44`,
+                borderTop:`3px solid ${C.amarillo}`, borderRadius:10, padding:'16px 18px'
+              }},
+                h('div',{style:{fontWeight:800,color:C.amarilloClaro,marginBottom:10,fontSize:14}},d.nombre),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,fontSize:12}},
+                  ...[['Ejecutado',fmtPct(d.pctReal),C.amarillo],['Esperado corte',fmtPct(PCT_ESPERADO),C.textoSub],
+                    ['Rezago (pp)',d.gasto===0?'Sin inicio':`-${(d.diffPp*100).toFixed(1)}pp`,'#f87171'],
+                    ['Presupuesto',fmtFull(d.anual),C.textoSub]
+                  ].map(([lbl,val,clr])=>h('div',{key:lbl},
+                    h('div',{style:{color:C.textoMuted,fontSize:10,textTransform:'uppercase',letterSpacing:'0.05em'}},lbl),
+                    h('div',{style:{fontWeight:800,color:clr,marginTop:2}},val)
+                  ))
+                ),
+                h('div',{style:{marginTop:10,background:'#451a0366',borderRadius:4,height:5}},
+                  h('div',{style:{width:`${Math.min(d.pctReal,1)*100}%`,height:'100%',background:C.amarillo,borderRadius:4}})
+                )
+              ))
+            )
+          )
+        ),
+
+        // ═══ TOP GASTO ══════════════════════════════════════════════════════
+        tab==='Top Gasto' && h('div',{style:{display:'grid',gap:20}},
+          h('div',{style:fbarStyle},
+            h('span',{style:{fontSize:11,color:C.textoMuted,fontWeight:700,textTransform:'uppercase',letterSpacing:'0.1em'}},'Vista:'),
+            ...[['ambos','↔ Comparativa'],['mayor','🏆 Mayor Gasto'],['menor','📉 Menor Ejecución']
+            ].map(([k,l])=>h(Chip,{key:k,label:l,active:topFilter===k,onClick:()=>setTopFilter(k)}))
+          ),
+
+          (topFilter==='mayor'||topFilter==='ambos') && h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontWeight:700}},
+              '🏆 Top 8 — Mayor Gasto Realizado'
+            ),
+            h(ResponsiveContainer,{width:'100%',height:300},
+              h(BarChart,{data:topGasto,layout:'vertical',margin:{left:0,right:24}},
+                h(XAxis,{type:'number',tickFormatter:fmt,tick:{fill:C.textoMuted,fontSize:10},axisLine:false,tickLine:false}),
+                h(YAxis,{type:'category',dataKey:'nombre',width:145,tick:{fill:C.textoSub,fontSize:10},axisLine:false,tickLine:false}),
+                h(Tooltip,{...ttStyle,formatter:v=>[fmtFull(v),'Gasto Real']}),
+                h(Bar,{dataKey:'gasto',radius:[0,4,4,0]},
+                  topGasto.map(d=>h(Cell,{key:d.nombre,fill:d.semaforoColor}))
+                )
+              )
+            )
+          ),
+
+          (topFilter==='menor'||topFilter==='ambos') && h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:14,fontWeight:700}},
+              '📉 Top 8 — Menor Ejecución %'
+            ),
+            h(ResponsiveContainer,{width:'100%',height:300},
+              h(BarChart,{data:topMenor,layout:'vertical',margin:{left:0,right:24}},
+                h(XAxis,{type:'number',domain:[0,1],tickFormatter:v=>`${(v*100).toFixed(0)}%`,tick:{fill:C.textoMuted,fontSize:10},axisLine:false,tickLine:false}),
+                h(YAxis,{type:'category',dataKey:'nombre',width:145,tick:{fill:C.textoSub,fontSize:10},axisLine:false,tickLine:false}),
+                h(Tooltip,{...ttStyle,formatter:v=>[fmtPct(v),'% Ejecutado']}),
+                h(Bar,{dataKey:'pctGastado',radius:[0,4,4,0]},
+                  topMenor.map(d=>h(Cell,{key:d.nombre,fill:d.semaforoColor}))
+                )
+              )
+            )
+          ),
+
+          // Tabla completa
+          h('div',{style:{background:C.fondoCard,border:`1px solid ${C.borde}`,borderRadius:16,padding:24}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14,flexWrap:'wrap',gap:10}},
+              h('div',{style:{fontSize:11,color:C.textoMuted,textTransform:'uppercase',letterSpacing:'0.1em',fontWeight:700}},
+                'Tabla Completa — '+filteredData.length+' presupuestos'
+              ),
+              h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}},
+                ...[['gasto','Mayor Gasto'],['pct','Mayor %'],['diferencial','Mayor Diferencial'],['anual','Mayor Presupuesto']
+                ].map(([k,l])=>h(Chip,{key:k,label:l,active:sortBy===k,accentColor:C.azulMed,onClick:()=>setSortBy(k)}))
+              )
+            ),
+            h('div',{style:{overflowX:'auto'}},
+              h('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:12}},
+                h('thead',null,
+                  h('tr',{style:{borderBottom:`2px solid ${C.borde2}`}},
+                    ...['Presupuesto','Anual Autorizado','Gasto Real','Sugerido Corte','Diferencial','% Eje.','Restante','Semáforo'].map(hd=>
+                      h('th',{key:hd,style:{padding:'8px 12px',textAlign:'left',color:C.textoMuted,fontWeight:700,textTransform:'uppercase',fontSize:10,letterSpacing:'0.06em',whiteSpace:'nowrap'}},hd)
+                    )
+                  )
+                ),
+                h('tbody',null,
+                  filteredData.map((d,i)=>h('tr',{key:d.nombre,style:{borderBottom:`1px solid ${C.fondo}`,background:i%2===0?'transparent':C.fondoCard2+'44'}},
+                    h('td',{style:{padding:'9px 12px',color:C.texto,fontWeight:700}},d.nombre),
+                    h('td',{style:{padding:'9px 12px',color:C.textoSub,whiteSpace:'nowrap'}},fmtFull(d.anual)),
+                    h('td',{style:{padding:'9px 12px',color:d.semaforoColor,fontWeight:800,whiteSpace:'nowrap'}},fmtFull(d.gasto)),
+                    h('td',{style:{padding:'9px 12px',color:C.textoMuted,whiteSpace:'nowrap'}},fmtFull(d.sugerido)),
+                    h('td',{style:{padding:'9px 12px',color:d.diferencial>0?C.rojo:C.azulClaro,fontWeight:700,whiteSpace:'nowrap'}},
+                      (d.diferencial>0?'+':'')+fmtFull(d.diferencial)
+                    ),
+                    h('td',{style:{padding:'9px 12px',whiteSpace:'nowrap'}},
+                      h('span',{style:{color:d.semaforoColor,fontWeight:800}},fmtPct(d.pctGastado))
+                    ),
+                    h('td',{style:{padding:'9px 12px',color:C.textoSub,whiteSpace:'nowrap'}},fmtFull(d.restante)),
+                    h('td',{style:{padding:'9px 12px'}},
+                      h('span',{style:{
+                        padding:'3px 10px', background:d.semaforoColor+'22',
+                        color:d.semaforoColor, borderRadius:12, fontSize:10, fontWeight:700,
+                        border:`1px solid ${d.semaforoColor}55`
+                      }},d.semaforoLabel)
+                    )
+                  ))
+                ),
+                h('tfoot',null,
+                  h('tr',{style:{borderTop:`2px solid ${C.borde2}`,background:C.fondoCard2}},
+                    h('td',{style:{padding:'10px 12px',color:C.texto,fontWeight:900,fontSize:13}},'TOTAL'),
+                    h('td',{style:{padding:'10px 12px',color:C.texto,fontWeight:800,whiteSpace:'nowrap'}},fmtFull(totalAnual)),
+                    h('td',{style:{padding:'10px 12px',color:C.azulClaro,fontWeight:900,whiteSpace:'nowrap'}},fmtFull(totalGasto)),
+                    h('td',{colSpan:4}),
+                    h('td',{style:{padding:'10px 12px',color:C.azulPastel,fontWeight:800,whiteSpace:'nowrap'}},fmtFull(totalRestante)),
+                    h('td',{style:{padding:'10px 12px',color:C.azulPastel,fontWeight:900}},fmtPct(pctTotal))
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(Dashboard));
+}
+</script>
+</body>
+</html>
