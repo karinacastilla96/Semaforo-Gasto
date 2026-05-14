@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Semáforo Presupuestal 2026</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0B1628;font-family:'Segoe UI','Helvetica Neue',sans-serif;color:#E8F1FF;min-height:100vh}
+.header{background:linear-gradient(135deg,#0A1F44 0%,#1A3A6B 60%,#1D5BB5 100%);padding:26px 32px 20px;border-bottom:3px solid #2E7CF6}
+.header h1{font-size:28px;font-weight:900;color:#fff;margin:6px 0}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px}
+.header-sub{font-size:13px;color:#93B4D4;margin-top:6px}
+.legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#93B4D4}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ej-box{background:rgba(10,31,68,.7);border:2px solid #2E7CF6;border-radius:14px;padding:16px 26px;text-align:center;min-width:150px}
+.ej-box .lbl{font-size:10px;color:#4F7299;text-transform:uppercase;letter-spacing:.14em}
+.ej-box .num{font-size:44px;font-weight:900;color:#DBEAFE;line-height:1.1;margin-top:4px}
+.ej-box .sub{font-size:11px;color:#93B4D4;margin-top:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;padding:22px 32px 0}
+.kpi{background:#112240;border:1px solid #1E3A5F;border-radius:12px;padding:14px 16px;border-top-width:3px;border-top-style:solid}
+.kpi .icon{font-size:20px;margin-bottom:5px}
+.kpi .kl{font-size:10px;color:#4F7299;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.kpi .kv{font-size:24px;font-weight:900}
+.kpi .ks{font-size:11px;color:#93B4D4;margin-top:3px}
+.tabs-wrap{padding:22px 32px 0}
+.tabs{display:flex;gap:3px;border-bottom:2px solid #1E3A5F}
+.tab{padding:10px 22px;background:transparent;color:#4F7299;border:none;border-radius:8px 8px 0 0;cursor:pointer;font-weight:500;font-size:13px;transition:all .15s;margin-bottom:-2px;font-family:inherit}
+.tab.active{background:#2E7CF6;color:#fff;font-weight:800}
+.content{padding:22px 32px 48px}
+.fbar{background:#112240;border:1px solid #1E3A5F;border-radius:12px;padding:12px 18px;margin-bottom:18px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fbl{font-size:11px;color:#4F7299;font-weight:700;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.chip{padding:5px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;white-space:nowrap;font-family:inherit}
+.divider{width:1px;height:22px;background:#254875;margin:0 4px;flex-shrink:0}
+.cnt{margin-left:auto;font-size:11px;color:#4F7299}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#112240;border:1px solid #1E3A5F;border-radius:16px;padding:24px;margin-bottom:20px}
+.ct{font-size:11px;color:#4F7299;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;font-weight:700}
+.pcard{background:#112240;border:1px solid #1E3A5F;border-radius:10px;padding:14px 20px;margin-bottom:10px;border-left-width:4px;border-left-style:solid}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10}
+.pn{font-weight:800;font-size:14px;color:#E8F1FF}
+.ps{font-size:11px;color:#4F7299;margin-top:3px}
+.pr{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.pst{text-align:right}
+.pst .v{font-size:15px;font-weight:800;color:#E8F1FF}
+.pst .l{font-size:10px;color:#4F7299}
+.badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+.pb{margin-top:10px}
+.pbbg{background:#254875;border-radius:4px;height:7px;overflow:hidden}
+.pbf{height:100%;border-radius:4px}
+.pbl{display:flex;justify-content:space-between;font-size:10px;color:#4F7299;margin-top:4px}
+.pm{margin-top:8px;font-size:11px;font-weight:700}
+.hbc{display:flex;flex-direction:column;gap:9px;margin-top:8px}
+.hbr{display:flex;align-items:center;gap:10px}
+.hbl{font-size:10px;color:#93B4D4;width:140px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.hbbg{flex:1;background:#254875;border-radius:4px;height:20px;overflow:hidden;min-width:60px}
+.hbf{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;min-width:4px}
+.hbv{font-size:10px;color:#fff;font-weight:700;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{border-bottom:2px solid #254875}
+th{padding:8px 12px;text-align:left;color:#4F7299;font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.06em;white-space:nowrap}
+tbody tr{border-bottom:1px solid #0B1628}
+tbody tr:nth-child(even){background:#162D4E44}
+td{padding:9px 12px;white-space:nowrap}
+tfoot tr{border-top:2px solid #254875;background:#162D4E}
+.atitle{font-size:14px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.abadge{border-radius:20px;padding:2px 12px;font-size:11px;border:1px solid transparent}
+.acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:24px}
+.acard{border-radius:10px;padding:16px 18px;border:1px solid transparent;border-top-width:3px;border-top-style:solid}
+.acname{font-weight:800;font-size:14px;margin-bottom:10px}
+.acg{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px}
+.aci label{color:#4F7299;font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:block}
+.aci .v{font-weight:800;margin-top:2px}
+.asub{font-size:11px;color:#4F7299;margin-bottom:12px}
+.cleg{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.cleg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:#93B4D4}
+.cleg-box{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+.donut-w{position:relative;width:180px;height:180px;margin:0 auto}
+.donut-svg{width:180px;height:180px;transform:rotate(-90deg)}
+.donut-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-pct{font-size:28px;font-weight:900;color:#DBEAFE}
+.donut-lbl{font-size:11px;color:#93B4D4}
+.sem-row{margin-bottom:14px}
+.sem-rh{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.sem-bg{background:#254875;border-radius:4px;height:8px;overflow:hidden}
+.sem-f{height:100%;border-radius:4px}
+.sem-names{font-size:10px;color:#4F7299;margin-top:3px}
+@media(max-width:700px){.g2{grid-template-columns:1fr}.hbl{width:90px}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ════════════════════════════════════════════════════════════
+//  DATOS — solo actualiza esta sección cada mes
+// ════════════════════════════════════════════════════════════
+const DATOS = {
+  mesCierre: "Abril 2026",
+  mesNum: 4,
+  presupuestos: [
+    { nombre:"Content",             anual:3900000,     gasto:1538650,    sugerido:1418181.82 },
+    { nombre:"Similandia",          anual:2000000,     gasto:605588.15,  sugerido:727272.73  },
+    { nombre:"Jueves de Bondad",    anual:1500000,     gasto:409359.38,  sugerido:545454.55  },
+    { nombre:"USI",                 anual:1500000,     gasto:398978.26,  sugerido:545454.55  },
+    { nombre:"Simipet",             anual:3000000,     gasto:796897.13,  sugerido:1090909.09 },
+    { nombre:"Ecommerce MX",        anual:14609361.94, gasto:3778975.41, sugerido:5312495.25 },
+    { nombre:"Museo Dr. Simi",      anual:3000000,     gasto:771852.09,  sugerido:1090909.09 },
+    { nombre:"Campana VGH",         anual:3000000,     gasto:751017.58,  sugerido:1090909.09 },
+    { nombre:"Branding Dr. Simi",   anual:17000000,    gasto:4245568.54, sugerido:6181818.18 },
+    { nombre:"Licencias",           anual:3000000,     gasto:747120.66,  sugerido:1090909.09 },
+    { nombre:"Fund. Simiplaneta",   anual:3000000,     gasto:976677.22,  sugerido:1090909.09 },
+    { nombre:"Simi Space",          anual:12000000,    gasto:2236105.36, sugerido:4363636.36 },
+    { nombre:"F. Similares Inst.",  anual:5400000,     gasto:813070.86,  sugerido:1963636.36 },
+    { nombre:"Pag. Satelite QPT",   anual:3000000,     gasto:365855.42,  sugerido:1090909.09 },
+    { nombre:"Simi Globo",          anual:2100000,     gasto:242448.64,  sugerido:763636.36  },
+    { nombre:"Ecommerce USA",       anual:21000000,    gasto:1865315.03, sugerido:7636363.64 },
+    { nombre:"Colombia",            anual:8000000,     gasto:1177747.15, sugerido:2909090.91 },
+    { nombre:"Mundial",             anual:12000000,    gasto:21352.5,    sugerido:4363636.36 },
+    { nombre:"Simi Fest",           anual:4800000,     gasto:0,          sugerido:1745454.55 },
+    { nombre:"Buen Fin",            anual:2000000,     gasto:0,          sugerido:727272.73  },
+    { nombre:"Inauguracion Isla",   anual:3000000,     gasto:0,          sugerido:1090909.09 },
+    { nombre:"Simicarreras",        anual:400000,      gasto:0,          sugerido:145454.55  }
+  ]
+};
+
+// ════════════════════════════════════════════════════════════
+//  LÓGICA DE SEMÁFORO
+// ════════════════════════════════════════════════════════════
+const MC  = DATOS.mesCierre;
+const MN  = DATOS.mesNum;
+const PE  = MN/12;
+const SC  = {excedido:"#DC2626",alerta:"#D97706",ok:"#2E7CF6",exacto:"#16A34A"};
+const SF  = {excedido:"#2D0A0A",alerta:"#2D1A00",ok:"#0A1F44",exacto:"#052E16"};
+const SL  = {excedido:"Excedido",alerta:"Alerta",ok:"En curso",exacto:"En meta"};
+
+function sem(d){
+  const p=d.anual>0?d.gasto/d.anual:0;
+  if(d.gasto===0)return"alerta";
+  if(p>PE)return"excedido";
+  const b=PE-p;
+  if(b>0.05)return"alerta";
+  if(b<=0.001)return"exacto";
+  return"ok";
+}
+
+const data=DATOS.presupuestos.map(d=>{
+  const pR=d.anual>0?d.gasto/d.anual:0,dp=PE-pR,s=sem(d);
+  return{...d,pR,dp,res:d.anual-d.gasto,dif:d.gasto-d.sugerido,s,sc:SC[s],sf:SF[s],sl:SL[s]};
+});
+
+const tA=data.reduce((a,d)=>a+d.anual,0);
+const tG=data.reduce((a,d)=>a+d.gasto,0);
+const tR=tA-tG,pT=tG/tA;
+const N2=new Intl.NumberFormat("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+const N0=new Intl.NumberFormat("es-MX",{minimumFractionDigits:0,maximumFractionDigits:0});
+const ff=v=>"$"+N2.format(Math.abs(v));
+const fm=v=>{const a=Math.abs(v),s=v<0?"-":"";return a>=1e6?s+"$"+N2.format(a/1e6)+"M":s+"$"+N0.format(a);};
+const fp=v=>(v*100).toFixed(1)+"%";
+const cs=s=>data.filter(d=>d.s===s).length;
+
+// ════════════════════════════════════════════════════════════
+//  ESTADO
+// ════════════════════════════════════════════════════════════
+let ST={tab:"Resumen",sort:"gasto",filter:"Todos",tv:"ambos",av:"Todos"};
+const set=p=>{Object.assign(ST,p);render();};
+
+// ════════════════════════════════════════════════════════════
+//  DOM HELPERS
+// ════════════════════════════════════════════════════════════
+function el(tag,a={},ch=[]){
+  const e=document.createElement(tag);
+  for(const[k,v]of Object.entries(a)){
+    if(k==="style"&&typeof v==="object")Object.assign(e.style,v);
+    else if(k.startsWith("on"))e.addEventListener(k.slice(2).toLowerCase(),v);
+    else e.setAttribute(k,v);
+  }
+  for(const c of[].concat(ch)){
+    if(c==null||c===false)continue;
+    e.appendChild(typeof c==="string"?document.createTextNode(c):c);
+  }
+  return e;
+}
+const dv=(a,c)=>el("div",a,c);
+const sp=(a,c)=>el("span",a,c);
+
+function chip(txt,active,onClick,color){
+  const bg=active?(color||"#2E7CF6"):"#162D4E";
+  const fg=active?"#fff":"#93B4D4";
+  const bd=active?(color||"#2E7CF6"):"#254875";
+  return el("button",{class:"chip",onclick:onClick,style:{background:bg,color:fg,border:"1px solid "+bd}},txt);
+}
+
+function hbar(label,val,maxV,color,fmtFn){
+  const w=maxV>0?Math.min(val/maxV,1)*100:0;
+  return dv({class:"hbr"},[
+    dv({class:"hbl"},label),
+    dv({class:"hbbg"},[dv({class:"hbf",style:{width:w+"%",background:color}},[sp({class:"hbv"},fmtFn(val))])])
+  ]);
+}
+
+function semLegend(){
+  return dv({class:"cleg"},[
+    ...[[SC.excedido,"🔴 Excedido"],[SC.alerta,"🟡 Alerta"],[SC.ok,"🔵 En curso"],[SC.exacto,"🟢 En meta"]].map(([c,l])=>
+      dv({class:"cleg-item"},[dv({class:"cleg-box",style:{background:c}}),l])
+    )
+  ]);
+}
+
+// ════════════════════════════════════════════════════════════
+//  COMPONENTES
+// ════════════════════════════════════════════════════════════
+function renderHeader(){
+  return dv({class:"header"},[
+    dv({class:"header-row"},[
+      dv({},[
+        sp({style:{fontSize:"11px",color:"#DBEAFE",fontWeight:700,letterSpacing:".2em",textTransform:"uppercase"}},"Control Presupuestal 2026"),
+        el("h1",{},"Semaforo de Gasto"),
+        dv({class:"header-sub"},[
+          "Corte: ",el("b",{},MC),"   ·   Avance esperado: ",sp({style:{color:"#DBEAFE",fontWeight:700}},fp(PE))
+        ]),
+        dv({class:"legend"},[
+          ...[[SC.excedido,"🔴 Excedido"],[SC.alerta,"🟡 Alerta (>5pp)"],[SC.ok,"🔵 En curso"],[SC.exacto,"🟢 En meta"]].map(([c,l])=>
+            dv({class:"legend-item"},[dv({class:"legend-dot",style:{background:c}}),l])
+          )
+        ])
+      ]),
+      dv({class:"ej-box"},[dv({class:"lbl"},"Ejecucion Global"),dv({class:"num"},fp(pT)),dv({class:"sub"},"del presupuesto anual")])
+    ])
+  ]);
+}
+
+function renderKPIs(){
+  return dv({class:"kpis"},[
+    ...[
+      {l:"Presupuesto Total Anual",v:fm(tA),  s:ff(tA),              c:"#2E7CF6",i:"💼"},
+      {l:"Gasto Realizado",        v:fm(tG),  s:fp(pT)+" ejecutado", c:"#fff",   i:"📊"},
+      {l:"Monto Restante",         v:fm(tR),  s:fp(tR/tA)+" disp.",  c:"#DBEAFE",i:"🏦"},
+      {l:"Excedidos 🔴",           v:cs("excedido"),s:"sobre el esperado",c:SC.excedido,i:"🔴"},
+      {l:"En Alerta 🟡",           v:cs("alerta"),  s:"sin inicio o >5pp",c:SC.alerta,  i:"🟡"},
+      {l:"En Curso 🔵",            v:cs("ok"),      s:"dentro del rango", c:SC.ok,       i:"🔵"},
+      {l:"En Meta 🟢",             v:cs("exacto"),  s:"alineados",         c:SC.exacto,   i:"🟢"},
+    ].map(k=>dv({class:"kpi",style:{borderTopColor:k.c}},[
+      dv({class:"icon"},k.i),dv({class:"kl"},k.l),
+      dv({class:"kv",style:{color:k.c}},String(k.v)),dv({class:"ks"},k.s)
+    ]))
+  ]);
+}
+
+function renderTabs(){
+  return dv({class:"tabs-wrap"},[
+    dv({class:"tabs"},["Resumen","Por Presupuesto","Alertas","Top Gasto"].map(t=>
+      el("button",{class:"tab"+(ST.tab===t?" active":""),onclick:()=>set({tab:t})},t)
+    ))
+  ]);
+}
+
+function pcard(d){
+  const dpa=Math.abs(d.dp*100).toFixed(1);
+  let msg;
+  if(d.s==="excedido") msg=dv({class:"pm",style:{color:d.sc}},"🔴 Excedido: "+fp(d.pR)+" ejecutado vs "+fp(PE)+" esperado (+"+dpa+"pp)");
+  else if(d.s==="alerta"&&d.gasto===0) msg=dv({class:"pm",style:{color:d.sc}},"🟡 Sin gasto registrado — se esperaba "+fp(PE)+" ("+ff(d.sugerido)+") al corte");
+  else if(d.s==="alerta") msg=dv({class:"pm",style:{color:d.sc}},"🟡 Rezago de "+dpa+"pp: tiene "+fp(d.pR)+", se esperaba "+fp(PE));
+  else if(d.s==="ok") msg=dv({class:"pm",style:{color:d.sc,fontWeight:400}},"🔵 A "+dpa+"pp del esperado ("+fp(PE)+") — dentro del rango");
+  else msg=dv({class:"pm",style:{color:d.sc}},"🟢 En meta — gasto alineado al sugerido");
+
+  return dv({class:"pcard",style:{borderLeftColor:d.sc}},[
+    dv({class:"ph"},[
+      dv({},[
+        dv({class:"pn"},d.nombre),
+        dv({class:"ps"},["Anual: ",sp({},ff(d.anual)),"   ·   Sugerido al corte: ",sp({style:{color:"#2E7CF6"}},ff(d.sugerido))])
+      ]),
+      dv({class:"pr"},[
+        dv({class:"pst"},[dv({class:"v"},ff(d.gasto)),dv({class:"l"},"gastado")]),
+        dv({class:"pst"},[dv({class:"v",style:{color:d.sc}},fp(d.pR)),dv({class:"l"},"del anual")]),
+        dv({class:"badge",style:{background:d.sc+"22",color:d.sc,borderColor:d.sc+"44"}},d.sl)
+      ])
+    ]),
+    dv({class:"pb"},[
+      dv({class:"pbbg"},[dv({class:"pbf",style:{width:Math.min(d.pR,1)*100+"%",background:d.sc}})]),
+      dv({class:"pbl"},[sp({},"0%"),sp({style:{color:"#2E7CF6"}},"Esperado: "+fp(PE)),sp({},"100%")])
+    ]),
+    msg
+  ]);
+}
+
+function renderResumen(){
+  const exc=data.filter(d=>d.s==="excedido"),alt=data.filter(d=>d.s==="alerta");
+  const ok=data.filter(d=>d.s==="ok"),exa=data.filter(d=>d.s==="exacto");
+  const top8g=[...data].sort((a,b)=>b.gasto-a.gasto).slice(0,8);
+  const top8p=[...data].sort((a,b)=>b.pR-a.pR).slice(0,8);
+
+  // donut SVG
+  const r=80,circ=2*Math.PI*r,dash=circ*pT;
+  const donut=dv({class:"card",style:{gridColumn:"1"}},[
+    dv({class:"ct"},"Distribucion del Presupuesto Total"),
+    dv({class:"donut-w"},[
+      el("svg",{class:"donut-svg",viewBox:"0 0 180 180"},[
+        el("circle",{cx:90,cy:90,r:80,fill:"none",stroke:"#254875","stroke-width":"22"}),
+        el("circle",{cx:90,cy:90,r:80,fill:"none",stroke:"#2E7CF6","stroke-width":"22",
+          "stroke-dasharray":`${dash} ${circ}`,"stroke-linecap":"round"})
+      ]),
+      dv({class:"donut-c"},[dv({class:"donut-pct"},fp(pT)),dv({class:"donut-lbl"},"ejecutado")])
+    ]),
+    dv({style:{marginTop:16,fontSize:12,display:"flex",flexDirection:"column",gap:6}},[
+      ...[["Gastado",ff(tG),"#2E7CF6"],["Restante",ff(tR),"#E8F1FF"],["Anual",ff(tA),"#E8F1FF"]].map(([l,v,c])=>
+        dv({style:{display:"flex",justifyContent:"space-between",color:"#93B4D4"}},[sp({},l),sp({style:{fontWeight:700,color:c}},v)])
+      )
+    ])
+  ]);
+
+  const semDist=dv({class:"card"},[
+    dv({class:"ct"},"Distribucion por Semaforo"),
+    ...[{l:"🔴 Excedidos",cnt:exc.length,c:SC.excedido,it:exc},{l:"🟡 En Alerta",cnt:alt.length,c:SC.alerta,it:alt},
+        {l:"🔵 En Curso",cnt:ok.length,c:SC.ok,it:ok},{l:"🟢 En Meta",cnt:exa.length,c:SC.exacto,it:exa}
+    ].map(row=>dv({class:"sem-row"},[
+      dv({class:"sem-rh"},[sp({style:{color:"#E8F1FF",fontWeight:700}},row.l),sp({style:{color:row.c,fontWeight:800}},row.cnt+" presupuestos")]),
+      dv({class:"sem-bg"},[dv({class:"sem-f",style:{width:(row.cnt/data.length*100)+"%",background:row.c}})]),
+      dv({class:"sem-names"},row.it.map(d=>d.nombre).join(" · "))
+    ]))
+  ]);
+
+  const pctCard=dv({class:"card"},[
+    dv({class:"ct"},"% Ejecutado — Top 8"),
+    dv({class:"hbc"},top8p.map(d=>hbar(d.nombre,d.pR,top8p[0].pR,d.sc,v=>fp(v)))),
+    semLegend()
+  ]);
+
+  const gastoCard=dv({class:"card"},[
+    dv({class:"ct"},"Gasto Real — Top 8"),
+    dv({class:"hbc"},top8g.map(d=>hbar(d.nombre,d.gasto,top8g[0].gasto,d.sc,v=>fm(v)))),
+    semLegend()
+  ]);
+
+  return dv({class:"g2"},[donut,semDist,pctCard,gastoCard]);
+}
+
+function renderPorPresupuesto(){
+  const exc=data.filter(d=>d.s==="excedido"),alt=data.filter(d=>d.s==="alerta");
+  const ok=data.filter(d=>d.s==="ok"),exa=data.filter(d=>d.s==="exacto");
+  let d=[...data];
+  if(ST.filter==="Excedido")d=exc; if(ST.filter==="Alerta")d=alt;
+  if(ST.filter==="En curso")d=ok;  if(ST.filter==="En meta")d=exa;
+  if(ST.sort==="gasto")d=[...d].sort((a,b)=>b.gasto-a.gasto);
+  if(ST.sort==="pct")  d=[...d].sort((a,b)=>b.pR-a.pR);
+  if(ST.sort==="diferencial")d=[...d].sort((a,b)=>b.dif-a.dif);
+  if(ST.sort==="anual")d=[...d].sort((a,b)=>b.anual-a.anual);
+
+  return dv({},[
+    dv({class:"fbar"},[
+      sp({class:"fbl"},"Semaforo:"),
+      chip(`Todos (${data.length})`,ST.filter==="Todos",()=>set({filter:"Todos"})),
+      chip(`🔴 Excedidos (${exc.length})`,ST.filter==="Excedido",()=>set({filter:"Excedido"}),SC.excedido),
+      chip(`🟡 Alerta (${alt.length})`,ST.filter==="Alerta",()=>set({filter:"Alerta"}),SC.alerta),
+      chip(`🔵 En Curso (${ok.length})`,ST.filter==="En curso",()=>set({filter:"En curso"}),SC.ok),
+      chip(`🟢 En Meta (${exa.length})`,ST.filter==="En meta",()=>set({filter:"En meta"}),SC.exacto),
+      dv({class:"divider"}),
+      sp({class:"fbl"},"Ordenar:"),
+      chip("Mayor Gasto",ST.sort==="gasto",()=>set({sort:"gasto"}),"#1A3A6B"),
+      chip("Mayor %",ST.sort==="pct",()=>set({sort:"pct"}),"#1A3A6B"),
+      chip("Mayor Diferencial",ST.sort==="diferencial",()=>set({sort:"diferencial"}),"#1A3A6B"),
+      chip("Mayor Presupuesto",ST.sort==="anual",()=>set({sort:"anual"}),"#1A3A6B"),
+      sp({class:"cnt"},d.length+"/"+data.length+" presupuestos")
+    ]),
+    ...d.map(pcard)
+  ]);
+}
+
+function renderAlertas(){
+  const exc=data.filter(d=>d.s==="excedido"),alt=data.filter(d=>d.s==="alerta");
+  const av=ST.av;
+  return dv({},[
+    dv({class:"fbar"},[
+      sp({class:"fbl"},"Tipo:"),
+      chip("Todas",av==="Todos",()=>set({av:"Todos"})),
+      chip(`🔴 Excedidos (${exc.length})`,av==="Excedidos",()=>set({av:"Excedidos"}),SC.excedido),
+      chip(`🟡 En Alerta (${alt.length})`,av==="Alertas",()=>set({av:"Alertas"}),SC.alerta),
+    ]),
+    (av==="Todos"||av==="Excedidos")&&exc.length>0&&dv({style:{marginBottom:28}},[
+      dv({class:"atitle",style:{color:SC.excedido}},[
+        "🔴 Presupuestos excedidos al corte",
+        sp({class:"abadge",style:{background:SF.excedido,color:SC.excedido,borderColor:SC.excedido+"55"}},exc.length+" presupuesto"+(exc.length!==1?"s":""))
+      ]),
+      dv({class:"acards"},exc.map(d=>dv({class:"acard",style:{background:SF.excedido,borderColor:SC.excedido+"44",borderTopColor:SC.excedido}},[
+        dv({class:"acname",style:{color:"#FECACA"}},d.nombre),
+        dv({class:"acg"},[
+          ...[[" Ejecutado",fp(d.pR),SC.excedido],["Esperado corte",fp(PE),"#93B4D4"],
+              ["Exceso pp",`+${(Math.abs(d.dp)*100).toFixed(1)}pp`,"#f87171"],
+              ["Excedente $",`+${ff(Math.abs(d.dif))}`,"#FECACA"]
+          ].map(([l,v,c])=>dv({class:"aci"},[el("label",{},l),dv({class:"v",style:{color:c}},v)]))
+        ])
+      ])))
+    ])||(null),
+    (av==="Todos"||av==="Alertas")&&alt.length>0&&dv({},[
+      dv({class:"atitle",style:{color:SC.alerta}},[
+        "🟡 Presupuestos en alerta",
+        sp({class:"abadge",style:{background:SF.alerta,color:SC.alerta,borderColor:SC.alerta+"55"}},alt.length+" presupuesto"+(alt.length!==1?"s":""))
+      ]),
+      dv({class:"asub"},"Sin inicio o con mas de 5pp de rezago vs el "+fp(PE)+" esperado al corte de "+MC+"."),
+      dv({class:"acards"},alt.map(d=>dv({class:"acard",style:{background:SF.alerta,borderColor:SC.alerta+"44",borderTopColor:SC.alerta}},[
+        dv({class:"acname",style:{color:"#FEF08A"}},d.nombre),
+        dv({class:"acg"},[
+          ...[[" Ejecutado",fp(d.pR),SC.alerta],["Esperado corte",fp(PE),"#93B4D4"],
+              ["Rezago pp",d.gasto===0?"Sin inicio":`-${(d.dp*100).toFixed(1)}pp`,"#f87171"],
+              ["Presupuesto",ff(d.anual),"#93B4D4"]
+          ].map(([l,v,c])=>dv({class:"aci"},[el("label",{},l),dv({class:"v",style:{color:c}},v)]))
+        ]),
+        dv({style:{marginTop:10,background:"#451a0366",borderRadius:4,height:5}},[
+          dv({style:{width:Math.min(d.pR,1)*100+"%",height:"100%",background:SC.alerta,borderRadius:4}})
+        ])
+      ])))
+    ])||(null)
+  ]);
+}
+
+function renderTopGasto(){
+  const exc=data.filter(d=>d.s==="excedido"),alt=data.filter(d=>d.s==="alerta");
+  const ok=data.filter(d=>d.s==="ok"),exa=data.filter(d=>d.s==="exacto");
+  let fd=[...data];
+  if(ST.filter==="Excedido")fd=exc; if(ST.filter==="Alerta")fd=alt;
+  if(ST.filter==="En curso")fd=ok;  if(ST.filter==="En meta")fd=exa;
+  if(ST.sort==="gasto")fd=[...fd].sort((a,b)=>b.gasto-a.gasto);
+  if(ST.sort==="pct")  fd=[...fd].sort((a,b)=>b.pR-a.pR);
+  if(ST.sort==="diferencial")fd=[...fd].sort((a,b)=>b.dif-a.dif);
+  if(ST.sort==="anual")fd=[...fd].sort((a,b)=>b.anual-a.anual);
+
+  const top8g=[...data].sort((a,b)=>b.gasto-a.gasto).slice(0,8);
+  const top8m=[...data].sort((a,b)=>a.pR-b.pR).slice(0,8);
+  const tv=ST.tv;
+
+  return dv({},[
+    dv({class:"fbar"},[
+      sp({class:"fbl"},"Vista:"),
+      chip("Comparativa",tv==="ambos",()=>set({tv:"ambos"})),
+      chip("Mayor Gasto",tv==="mayor",()=>set({tv:"mayor"})),
+      chip("Menor Ejecucion",tv==="menor",()=>set({tv:"menor"})),
+    ]),
+    (tv==="mayor"||tv==="ambos")&&dv({class:"card"},[
+      dv({class:"ct"},"Top 8 — Mayor Gasto Realizado"),
+      dv({class:"hbc"},top8g.map(d=>hbar(d.nombre,d.gasto,top8g[0].gasto,d.sc,v=>fm(v)))),
+      semLegend()
+    ])||(null),
+    (tv==="menor"||tv==="ambos")&&dv({class:"card"},[
+      dv({class:"ct"},"Top 8 — Menor Ejecucion %"),
+      dv({class:"hbc"},top8m.map(d=>hbar(d.nombre,d.pR,Math.max(top8m[top8m.length-1]?.pR||0.01,PE+0.01),d.sc,v=>fp(v)))),
+      semLegend()
+    ])||(null),
+    dv({class:"card"},[
+      dv({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:10}},[
+        dv({class:"ct",style:{marginBottom:0}},"Tabla Completa — "+fd.length+" presupuestos"),
+        dv({style:{display:"flex",gap:8,flexWrap:"wrap"}},[
+          chip("Mayor Gasto",ST.sort==="gasto",()=>set({sort:"gasto"}),"#1A3A6B"),
+          chip("Mayor %",ST.sort==="pct",()=>set({sort:"pct"}),"#1A3A6B"),
+          chip("Mayor Diferencial",ST.sort==="diferencial",()=>set({sort:"diferencial"}),"#1A3A6B"),
+          chip("Mayor Presupuesto",ST.sort==="anual",()=>set({sort:"anual"}),"#1A3A6B"),
+        ])
+      ]),
+      dv({style:{overflowX:"auto"}},[
+        el("table",{},[
+          el("thead",{},[el("tr",{},[
+            ...["Presupuesto","Anual Autorizado","Gasto Real","Sugerido Corte","Diferencial","% Eje.","Restante","Semaforo"]
+              .map(h=>el("th",{},h))
+          ])]),
+          el("tbody",{},fd.map((d,i)=>el("tr",{style:{background:i%2===0?"transparent":"#162D4E44"}},[
+            el("td",{style:{fontWeight:700,color:"#E8F1FF"}},d.nombre),
+            el("td",{style:{color:"#93B4D4"}},ff(d.anual)),
+            el("td",{style:{color:d.sc,fontWeight:800}},ff(d.gasto)),
+            el("td",{style:{color:"#4F7299"}},ff(d.sugerido)),
+            el("td",{style:{color:d.dif>0?SC.excedido:SC.ok,fontWeight:700}},(d.dif>0?"+":"")+ff(d.dif)),
+            el("td",{},[sp({style:{color:d.sc,fontWeight:800}},fp(d.pR))]),
+            el("td",{style:{color:"#93B4D4"}},ff(d.res)),
+            el("td",{},[sp({style:{padding:"3px 10px",background:d.sc+"22",color:d.sc,borderRadius:12,fontSize:10,fontWeight:700,border:"1px solid "+d.sc+"55"}},d.sl)])
+          ]))),
+          el("tfoot",{},[el("tr",{},[
+            el("td",{style:{fontWeight:900,fontSize:13,color:"#E8F1FF",padding:"10px 12px"}},"TOTAL"),
+            el("td",{style:{fontWeight:800,color:"#E8F1FF",padding:"10px 12px"}},ff(tA)),
+            el("td",{style:{fontWeight:900,color:SC.ok,padding:"10px 12px"}},ff(tG)),
+            el("td",{colSpan:4}),
+            el("td",{style:{fontWeight:800,color:"#DBEAFE",padding:"10px 12px"}},ff(tR)),
+            el("td",{style:{fontWeight:900,color:"#DBEAFE",padding:"10px 12px"}},fp(pT))
+          ])])
+        ])
+      ])
+    ])
+  ]);
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER PRINCIPAL
+// ════════════════════════════════════════════════════════════
+function render(){
+  const app=document.getElementById("app");
+  app.innerHTML="";
+  let tab;
+  if(ST.tab==="Resumen")tab=renderResumen();
+  else if(ST.tab==="Por Presupuesto")tab=renderPorPresupuesto();
+  else if(ST.tab==="Alertas")tab=renderAlertas();
+  else tab=renderTopGasto();
+  app.appendChild(renderHeader());
+  app.appendChild(renderKPIs());
+  app.appendChild(renderTabs());
+  app.appendChild(dv({class:"content"},[tab]));
+}
+
+render();
+</script>
+</body>
+</html>
