@@ -1,0 +1,28 @@
+{
+  "mesCierre": "Abril 2026",
+  "mesNum": 4,
+  "presupuestos": [
+    { "nombre": "Content",              "anual": 3900000,     "gasto": 1538650,    "sugerido": 1418181.82 },
+    { "nombre": "Similandia",           "anual": 2000000,     "gasto": 605588.15,  "sugerido": 727272.73  },
+    { "nombre": "Jueves de Bondad",     "anual": 1500000,     "gasto": 409359.38,  "sugerido": 545454.55  },
+    { "nombre": "USI",                  "anual": 1500000,     "gasto": 398978.26,  "sugerido": 545454.55  },
+    { "nombre": "Simipet",              "anual": 3000000,     "gasto": 796897.13,  "sugerido": 1090909.09 },
+    { "nombre": "Ecommerce MX",         "anual": 14609361.94, "gasto": 3778975.41, "sugerido": 5312495.25 },
+    { "nombre": "Museo Dr. Simi",       "anual": 3000000,     "gasto": 771852.09,  "sugerido": 1090909.09 },
+    { "nombre": "Campaña VGH",          "anual": 3000000,     "gasto": 751017.58,  "sugerido": 1090909.09 },
+    { "nombre": "Branding Dr. Simi",    "anual": 17000000,    "gasto": 4245568.54, "sugerido": 6181818.18 },
+    { "nombre": "Licencias",            "anual": 3000000,     "gasto": 747120.66,  "sugerido": 1090909.09 },
+    { "nombre": "Fund. Simiplaneta",    "anual": 3000000,     "gasto": 976677.22,  "sugerido": 1090909.09 },
+    { "nombre": "Simi Space",           "anual": 12000000,    "gasto": 2236105.36, "sugerido": 4363636.36 },
+    { "nombre": "F. Similares Inst.",   "anual": 5400000,     "gasto": 813070.86,  "sugerido": 1963636.36 },
+    { "nombre": "Página Satélite QPT",  "anual": 3000000,     "gasto": 365855.42,  "sugerido": 1090909.09 },
+    { "nombre": "Simi Globo",           "anual": 2100000,     "gasto": 242448.64,  "sugerido": 763636.36  },
+    { "nombre": "Ecommerce USA",        "anual": 21000000,    "gasto": 1865315.03, "sugerido": 7636363.64 },
+    { "nombre": "Colombia",             "anual": 8000000,     "gasto": 1177747.15, "sugerido": 2909090.91 },
+    { "nombre": "Mundial",              "anual": 12000000,    "gasto": 21352.5,    "sugerido": 4363636.36 },
+    { "nombre": "Simi Fest",            "anual": 4800000,     "gasto": 0,          "sugerido": 1745454.55 },
+    { "nombre": "Buen Fin",             "anual": 2000000,     "gasto": 0,          "sugerido": 727272.73  },
+    { "nombre": "Inauguración Isla",    "anual": 3000000,     "gasto": 0,          "sugerido": 1090909.09 },
+    { "nombre": "Simicarreras",         "anual": 400000,      "gasto": 0,          "sugerido": 145454.55  }
+  ]
+}
