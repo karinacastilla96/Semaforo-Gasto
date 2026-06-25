@@ -14,10 +14,10 @@ body{background:#0B1628;font-family:'Segoe UI','Helvetica Neue',sans-serif;color
 .legend{display:flex;gap:14px;margin-top:12px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:#93B4D4}
 .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.ej-box{background:rgba(10,31,68,.7);border:2px solid #2E7CF6;border-radius:14px;padding:16px 26px;text-align:center;min-width:150px}
-.ej-box .lbl{font-size:10px;color:#4F7299;text-transform:uppercase;letter-spacing:.14em}
-.ej-box .num{font-size:44px;font-weight:900;color:#DBEAFE;line-height:1.1;margin-top:4px}
-.ej-box .sub{font-size:11px;color:#93B4D4;margin-top:2px}
+.ej-box{background:rgba(10,31,68,.7);border:2px solid #2E7CF6;border-radius:14px;padding:14px 22px;text-align:center;min-width:135px}
+.ej-box .lbl{font-size:10px;color:#4F7299;text-transform:uppercase;letter-spacing:.1em}
+.ej-box .num{font-size:38px;font-weight:900;color:#DBEAFE;line-height:1.1;margin-top:4px}
+.ej-box .sub{font-size:10px;color:#93B4D4;margin-top:2px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:14px;padding:22px 32px 0}
 .kpi{background:#112240;border:1px solid #1E3A5F;border-radius:12px;padding:14px 16px;border-top-width:3px;border-top-style:solid}
 .kpi .icon{font-size:20px;margin-bottom:5px}
@@ -86,7 +86,7 @@ tfoot tr{border-top:2px solid #254875;background:#162D4E}
 .sem-bg{background:#254875;border-radius:4px;height:8px;overflow:hidden}
 .sem-f{height:100%;border-radius:4px}
 .sem-names{font-size:10px;color:#4F7299;margin-top:3px}
-@media(max-width:700px){.g2{grid-template-columns:1fr}.hbl{width:90px}}
+@media(max-width:700px){.g2{grid-template-columns:1fr}.hbl{width:90px}.ej-box{min-width:120px;padding:10px 16px}.ej-box .num{font-size:28px}}
 </style>
 </head>
 <body>
@@ -96,31 +96,31 @@ tfoot tr{border-top:2px solid #254875;background:#162D4E}
 //  DATOS — solo actualiza esta sección cada mes
 // ════════════════════════════════════════════════════════════
 const DATOS = {
-  mesCierre: "Abril 2026",
-  mesNum: 4,
+  mesCierre: "Mayo 2026",
+  mesNum: 5,
   presupuestos: [
-    { nombre:"Content",             anual:3900000,     gasto:1538650,    sugerido:1418181.82 },
-    { nombre:"Similandia",          anual:2000000,     gasto:605588.15,  sugerido:727272.73  },
-    { nombre:"Jueves de Bondad",    anual:1500000,     gasto:409359.38,  sugerido:545454.55  },
-    { nombre:"USI",                 anual:1500000,     gasto:398978.26,  sugerido:545454.55  },
-    { nombre:"Simipet",             anual:3000000,     gasto:796897.13,  sugerido:1090909.09 },
-    { nombre:"Ecommerce MX",        anual:14609361.94, gasto:3778975.41, sugerido:5312495.25 },
-    { nombre:"Museo Dr. Simi",      anual:3000000,     gasto:771852.09,  sugerido:1090909.09 },
-    { nombre:"Campana VGH",         anual:3000000,     gasto:751017.58,  sugerido:1090909.09 },
-    { nombre:"Branding Dr. Simi",   anual:17000000,    gasto:4245568.54, sugerido:6181818.18 },
-    { nombre:"Licencias",           anual:3000000,     gasto:747120.66,  sugerido:1090909.09 },
-    { nombre:"Fund. Simiplaneta",   anual:3000000,     gasto:976677.22,  sugerido:1090909.09 },
-    { nombre:"Simi Space",          anual:12000000,    gasto:2236105.36, sugerido:4363636.36 },
-    { nombre:"F. Similares Inst.",  anual:5400000,     gasto:813070.86,  sugerido:1963636.36 },
-    { nombre:"Pag. Satelite QPT",   anual:3000000,     gasto:365855.42,  sugerido:1090909.09 },
-    { nombre:"Simi Globo",          anual:2100000,     gasto:242448.64,  sugerido:763636.36  },
-    { nombre:"Ecommerce USA",       anual:21000000,    gasto:1865315.03, sugerido:7636363.64 },
-    { nombre:"Colombia",            anual:8000000,     gasto:1177747.15, sugerido:2909090.91 },
-    { nombre:"Mundial",             anual:12000000,    gasto:21352.5,    sugerido:4363636.36 },
-    { nombre:"Simi Fest",           anual:4800000,     gasto:0,          sugerido:1745454.55 },
-    { nombre:"Buen Fin",            anual:2000000,     gasto:0,          sugerido:727272.73  },
-    { nombre:"Inauguracion Isla",   anual:3000000,     gasto:0,          sugerido:1090909.09 },
-    { nombre:"Simicarreras",        anual:400000,      gasto:0,          sugerido:145454.55  }
+    { nombre:"Content",             anual:3900000,     gasto:2347933.34, sugerido:1772727.27 },
+    { nombre:"Similandia",          anual:2000000,     gasto:702688.20,  sugerido:909090.91  },
+    { nombre:"Jueves de Bondad",    anual:1500000,     gasto:612109.30,  sugerido:681818.18  },
+    { nombre:"USI",                 anual:1500000,     gasto:523878.57,  sugerido:681818.18  },
+    { nombre:"Simipet",             anual:3000000,     gasto:1126035.12, sugerido:1363636.36 },
+    { nombre:"Ecommerce MX",        anual:14609361.94, gasto:4998446.03, sugerido:6640619.06 },
+    { nombre:"Museo Dr. Simi",      anual:3000000,     gasto:1019619.23, sugerido:1363636.36 },
+    { nombre:"Campana VGH",         anual:3000000,     gasto:1052939.68, sugerido:1363636.36 },
+    { nombre:"Branding Dr. Simi",   anual:17000000,    gasto:4704879.18, sugerido:7727272.73 },
+    { nombre:"Licencias",           anual:3000000,     gasto:873272.48,  sugerido:1363636.36 },
+    { nombre:"Fund. Simiplaneta",   anual:3000000,     gasto:1226502.87, sugerido:1363636.36 },
+    { nombre:"Simi Space",          anual:12000000,    gasto:2480125.37, sugerido:5454545.45 },
+    { nombre:"F. Similares Inst.",  anual:5400000,     gasto:1373374.74, sugerido:2454545.45 },
+    { nombre:"Pag. Satelite QPT",   anual:3000000,     gasto:393595.75,  sugerido:1363636.36 },
+    { nombre:"Simi Globo",          anual:2100000,     gasto:394787.57,  sugerido:954545.45  },
+    { nombre:"Ecommerce USA",       anual:21000000,    gasto:1865315.03, sugerido:9545454.55 },
+    { nombre:"Colombia",            anual:8000000,     gasto:1177747.15, sugerido:3636363.64 },
+    { nombre:"Mundial",             anual:12000000,    gasto:1049467.49, sugerido:5454545.45 },
+    { nombre:"Simi Fest",           anual:4800000,     gasto:997011,     sugerido:2181818.18 },
+    { nombre:"Buen Fin",            anual:2000000,     gasto:0,          sugerido:909090.91  },
+    { nombre:"Inauguracion Isla",   anual:3000000,     gasto:0,          sugerido:1363636.36 },
+    { nombre:"Simicarreras",        anual:400000,      gasto:9941.69,    sugerido:181818.18  }
   ]
 };
 
@@ -152,6 +152,15 @@ const data=DATOS.presupuestos.map(d=>{
 const tA=data.reduce((a,d)=>a+d.anual,0);
 const tG=data.reduce((a,d)=>a+d.gasto,0);
 const tR=tA-tG,pT=tG/tA;
+
+// ── Ejecucion ajustada: excluye presupuestos estacionales ────────────────
+// (gasto concentrado en una temporada especifica, no lineal en el año)
+const ESTACIONALES = ["Buen Fin","Inauguracion Isla","Simi Fest"];
+const dataAjustada = data.filter(d=>!ESTACIONALES.includes(d.nombre));
+const tAaj = dataAjustada.reduce((a,d)=>a+d.anual,0);
+const tGaj = dataAjustada.reduce((a,d)=>a+d.gasto,0);
+const tRaj = tAaj-tGaj, pTaj = tGaj/tAaj;
+
 const N2=new Intl.NumberFormat("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
 const N0=new Intl.NumberFormat("es-MX",{minimumFractionDigits:0,maximumFractionDigits:0});
 const ff=v=>"$"+N2.format(Math.abs(v));
@@ -223,9 +232,19 @@ function renderHeader(){
           ...[[SC.excedido,"🔴 Excedido"],[SC.alerta,"🟡 Alerta (>5pp)"],[SC.ok,"🔵 En curso"],[SC.exacto,"🟢 En meta"]].map(([c,l])=>
             dv({class:"legend-item"},[dv({class:"legend-dot",style:{background:c}}),l])
           )
-        ])
+        ]),
+        dv({style:{fontSize:10,color:"#4F7299",marginTop:8}},
+          "*Ejecución ajustada excluye: "+ESTACIONALES.join(", ")+" (gasto concentrado en temporada específica)"
+        )
       ]),
-      dv({class:"ej-box"},[dv({class:"lbl"},"Ejecucion Global"),dv({class:"num"},fp(pT)),dv({class:"sub"},"del presupuesto anual")])
+      dv({style:{display:"flex",gap:14,flexWrap:"wrap"}},[
+        dv({class:"ej-box"},[dv({class:"lbl"},"Ejecucion Global"),dv({class:"num"},fp(pT)),dv({class:"sub"},"del presupuesto anual")]),
+        dv({class:"ej-box",style:{borderColor:"#16A34A"}},[
+          dv({class:"lbl"},"Ejecucion Ajustada"),
+          dv({class:"num",style:{color:"#BBF7D0"}},fp(pTaj)),
+          dv({class:"sub"},"excluye estacionales*")
+        ])
+      ])
     ])
   ]);
 }
@@ -306,7 +325,12 @@ function renderResumen(){
       ...[["Gastado",ff(tG),"#2E7CF6"],["Restante",ff(tR),"#E8F1FF"],["Anual",ff(tA),"#E8F1FF"]].map(([l,v,c])=>
         dv({style:{display:"flex",justifyContent:"space-between",color:"#93B4D4"}},[sp({},l),sp({style:{fontWeight:700,color:c}},v)])
       )
-    ])
+    ]),
+    dv({style:{marginTop:14,paddingTop:14,borderTop:"1px solid #1E3A5F",fontSize:12,display:"flex",justifyContent:"space-between",alignItems:"center"}},[
+      sp({style:{color:"#93B4D4"}},"Ejecución ajustada*"),
+      sp({style:{fontWeight:800,color:"#BBF7D0",fontSize:16}},fp(pTaj))
+    ]),
+    dv({style:{fontSize:10,color:"#4F7299",marginTop:4}},"*Excluye "+ESTACIONALES.join(", "))
   ]);
 
   const semDist=dv({class:"card"},[
